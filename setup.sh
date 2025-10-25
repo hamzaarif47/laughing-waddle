@@ -18,11 +18,23 @@ fi
 
 # Start PostgreSQL with Docker Compose
 echo -e "\n${GREEN}Starting PostgreSQL database...${NC}"
-docker-compose up -d
+docker compose up -d
 
-# Wait for PostgreSQL to be ready
+# Wait for PostgreSQL to be ready with health check
 echo -e "${GREEN}Waiting for PostgreSQL to be ready...${NC}"
-sleep 5
+MAX_RETRIES=30
+RETRY_COUNT=0
+until docker compose exec -T postgres pg_isready -U postgres > /dev/null 2>&1 || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+    echo -n "."
+    sleep 1
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+done
+echo ""
+
+if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+    echo -e "${RED}PostgreSQL failed to start within expected time${NC}"
+    exit 1
+fi
 
 # Setup backend
 echo -e "\n${GREEN}Setting up backend...${NC}"
@@ -31,8 +43,8 @@ cd backend
 if [ ! -f ".env" ]; then
     echo -e "${BLUE}Creating .env file...${NC}"
     cp .env.example .env
-    # Update the password to match docker-compose
-    sed -i 's/DB_PASSWORD=your_password_here/DB_PASSWORD=postgres123/' .env
+    echo -e "${BLUE}Please update backend/.env with your database password${NC}"
+    echo -e "${BLUE}The default password in docker-compose.yml is 'postgres123'${NC}"
 fi
 
 if [ ! -d "node_modules" ]; then

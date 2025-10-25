@@ -239,6 +239,21 @@ npm run build
 
 The build files will be in the `frontend/dist` directory.
 
+### Production Considerations
+
+Before deploying to production, consider implementing the following:
+
+1. **Rate Limiting**: Add rate limiting middleware (e.g., `express-rate-limit`) to protect against denial-of-service attacks
+2. **HTTPS**: Use HTTPS for all connections
+3. **Environment Variables**: Use strong, unique secrets for JWT_SECRET
+4. **Database Security**: Use connection pooling limits and prepared statements
+5. **CORS**: Configure CORS to allow only trusted domains
+6. **Logging**: Implement proper logging and monitoring
+7. **Error Handling**: Add comprehensive error handling and sanitize error messages
+8. **Input Sanitization**: Additional input validation beyond express-validator
+9. **Database Backups**: Regular automated backups of PostgreSQL
+10. **Security Headers**: Add security headers using `helmet` middleware
+
 ## Environment Variables
 
 ### Backend
